@@ -50,7 +50,7 @@ if ($utente === $crmUser && $password === $crmPass) {
     $payload = [
         'iss' => 'http://localhost/apiSynthesys', // Chi ha emesso il token
         'iat' => time(),                          // Data e ora di creazione
-        'exp' => time() + 3600,                   // Scadenza: 1 ora da adesso (3600 secondi)
+        'exp' => time() + 36000,                   // Scadenza: 10 ora da adesso (36000 secondi)
         'data' => [
             'id_utente' => 1,
             'ruolo' => 'amministratore'
