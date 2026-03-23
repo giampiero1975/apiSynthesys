@@ -10,18 +10,41 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 
-// 2. La tua chiave segreta (Non condividerla mai!)
-$chiaveSegreta = "M3tmi_2026!Synthesys_Secure_K3y#789_v2";
+// 2. Loader .env → usa putenv/getenv (non dipende da variables_order nel php.ini)
+function loadEnv($path) {
+    if (!file_exists($path)) return;
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = rtrim($line, "\r\n");
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        list($name, $value) = explode('=', $line, 2);
+        $name  = trim($name);
+        $value = trim($value, "\"' \r\n");
+        putenv("$name=$value");   // disponibile ovunque via getenv()
+    }
+}
+loadEnv(__DIR__ . '/.env');
+
+$chiaveSegreta = getenv('JWT_SECRET');
+$crmUser       = getenv('CRM_USER');
+$crmPass       = getenv('CRM_PASS');
+
+// Fail-closed: se la chiave non è caricata, l'API non firma nulla
+if (!$chiaveSegreta) {
+    http_response_code(500);
+    die(json_encode(["errore" => "ERRORE CRITICO: JWT_SECRET non caricato. Verificare percorso del file .env."]));
+}
 
 // 3. Riceviamo i dati inviati dal cliente (es. da Postman o da un'altra app)
 // Usiamo file_get_contents per leggere i dati inviati in formato JSON
 $datiInviati = json_decode(file_get_contents("php://input"));
 
-$utente = $datiInviati->username ?? '';
+$utente   = $datiInviati->username ?? '';
 $password = $datiInviati->password ?? '';
 
-// 4. Controlliamo le credenziali (In futuro qui potrai interrogare un tuo database)
-if ($utente === 'apisynthesys' && $password === '!Synthesys20260323!') {
+// 4. Controlliamo le credenziali contro i valori del file .env
+if ($utente === $crmUser && $password === $crmPass) {
     
     // Credenziali valide! Creiamo il pass temporaneo (Token)
     $payload = [
@@ -34,14 +57,14 @@ if ($utente === 'apisynthesys' && $password === '!Synthesys20260323!') {
         ]
     ];
 
-    // Generiamo la stringa criptata
+    // Generiamo la stringa criptata con getenv() — stessa sorgente usata per la validazione
     $jwt = JWT::encode($payload, $chiaveSegreta, 'HS256');
     
     // Rispondiamo con successo e consegniamo il token
     http_response_code(200);
     echo json_encode([
         "messaggio" => "Login effettuato con successo.",
-        "token" => $jwt
+        "token"     => $jwt
     ]);
 
 } else {

@@ -1,0 +1,5 @@
+# Blocca l'accesso diretto al file .env dal browser (403 Forbidden)
+<Files .env>
+    Order allow,deny
+    Deny from all
+</Files>
