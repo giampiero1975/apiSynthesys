@@ -11,7 +11,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 
 // 2. La tua chiave segreta (Non condividerla mai!)
-$chiaveSegreta = "LaMiaChiaveSegretaSuperSicura2026!";
+$chiaveSegreta = "M3tmi_2026!Synthesys_Secure_K3y#789_v2";
 
 // 3. Riceviamo i dati inviati dal cliente (es. da Postman o da un'altra app)
 // Usiamo file_get_contents per leggere i dati inviati in formato JSON
@@ -21,7 +21,7 @@ $utente = $datiInviati->username ?? '';
 $password = $datiInviati->password ?? '';
 
 // 4. Controlliamo le credenziali (In futuro qui potrai interrogare un tuo database)
-if ($utente === 'admin' && $password === 'password123') {
+if ($utente === 'apisynthesys' && $password === '!Synthesys20260323!') {
     
     // Credenziali valide! Creiamo il pass temporaneo (Token)
     $payload = [
